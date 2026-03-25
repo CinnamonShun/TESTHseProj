@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/image_processor.dir/image_processor.cpp.o CMakeFiles/image_processor.dir/bmp_reader.cpp.o CMakeFiles/image_processor.dir/bmp_writer.cpp.o -o image_processor 
