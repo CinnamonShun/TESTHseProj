@@ -9,13 +9,11 @@
 #include "bmp_format.h"
 #include "exceptions.h"
 
-namespace {
+constexpr uint16_t KBmpSignature = 0x4D42;
+constexpr uint16_t KBitsPerPixel = 24;
+constexpr uint32_t KCompression = 0;
 
-constexpr uint16_t kBmpSignature = 0x4D42;
-constexpr uint16_t kBitsPerPixel = 24;
-constexpr uint32_t kCompression = 0;
-
-size_t CalculatePadding(const size_t width) {
+size_t CalculatePaddingWriter(const size_t width) {
     const size_t row_bytes = width * 3;
     return (4 - (row_bytes % 4)) % 4;
 }
@@ -43,7 +41,7 @@ BmpFileHeader BuildFileHeader(const size_t data_size) {
     }
 
     BmpFileHeader file_header{};
-    file_header.signature = kBmpSignature;
+    file_header.signature = KBmpSignature;
     file_header.file_size = static_cast<uint32_t>(file_size);
     file_header.reserved1 = 0;
     file_header.reserved2 = 0;
@@ -62,8 +60,8 @@ BmpInfoHeader BuildInfoHeader(const size_t width, const size_t height, const siz
     info_header.width = static_cast<int32_t>(width);
     info_header.height = static_cast<int32_t>(height);
     info_header.planes = 1;
-    info_header.bits_per_pixel = kBitsPerPixel;
-    info_header.compression = kCompression;
+    info_header.bits_per_pixel = KBitsPerPixel;
+    info_header.compression = KCompression;
     info_header.image_size = static_cast<uint32_t>(data_size);
     info_header.x_pixels_per_meter = 0;
     info_header.y_pixels_per_meter = 0;
@@ -79,7 +77,7 @@ size_t CalculateDataSize(const size_t width, const size_t height) {
     }
 
     const size_t row_bytes = width * 3;
-    const size_t padding = CalculatePadding(width);
+    const size_t padding = CalculatePaddingWriter(width);
 
     if (row_bytes > std::numeric_limits<size_t>::max() - padding) {
         throw InvalidArgumentsException("image is too large");
@@ -93,15 +91,13 @@ size_t CalculateDataSize(const size_t width, const size_t height) {
     return stride * height;
 }
 
-}  // namespace
-
 void BmpWriter::Write(const std::string& path, const Image& image) const {
     const size_t width = image.GetWidth();
     const size_t height = image.GetHeight();
 
     ValidateDimensions(width, height);
 
-    const size_t padding = CalculatePadding(width);
+    const size_t padding = CalculatePaddingWriter(width);
     const size_t data_size = CalculateDataSize(width, height);
 
     const BmpFileHeader file_header = BuildFileHeader(data_size);

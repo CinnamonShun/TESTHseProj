@@ -9,14 +9,12 @@
 #include "bmp_format.h"
 #include "exceptions.h"
 
-namespace {
-
-constexpr uint16_t kBmpSignature = 0x4D42;
-constexpr uint16_t kSupportedBitsPerPixel = 24;
-constexpr uint32_t kSupportedCompression = 0;
+constexpr uint16_t KBmpSignature = 0x4D42;
+constexpr uint16_t KSupportedBitsPerPixel = 24;
+constexpr uint32_t KSupportedCompression = 0;
 
 void ValidateHeaders(const BmpFileHeader& file_header, const BmpInfoHeader& info_header) {
-    if (file_header.signature != kBmpSignature) {
+    if (file_header.signature != KBmpSignature) {
         throw InvalidFormatException("file signature is not BM");
     }
 
@@ -28,11 +26,11 @@ void ValidateHeaders(const BmpFileHeader& file_header, const BmpInfoHeader& info
         throw InvalidFormatException("invalid planes count");
     }
 
-    if (info_header.bits_per_pixel != kSupportedBitsPerPixel) {
+    if (info_header.bits_per_pixel != KSupportedBitsPerPixel) {
         throw InvalidFormatException("only 24-bit BMP is supported");
     }
 
-    if (info_header.compression != kSupportedCompression) {
+    if (info_header.compression != KSupportedCompression) {
         throw InvalidFormatException("compressed BMP is not supported");
     }
 
@@ -61,7 +59,7 @@ size_t GetHeightAbs(const int32_t height) {
     return static_cast<size_t>(positive_height);
 }
 
-size_t CalculatePadding(const size_t width) {
+size_t CalculatePaddingReader(const size_t width) {
     const size_t row_bytes = width * 3;
     return (4 - (row_bytes % 4)) % 4;
 }
@@ -72,7 +70,7 @@ void ValidateImageSize(const size_t width, const size_t height) {
     }
 
     const size_t row_bytes = width * 3;
-    const size_t padding = CalculatePadding(width);
+    const size_t padding = CalculatePaddingReader(width);
 
     if (row_bytes > std::numeric_limits<size_t>::max() - padding) {
         throw InvalidFormatException("image is too large");
@@ -100,8 +98,6 @@ void EnsureStreamSize(std::ifstream& file, const BmpFileHeader& file_header, con
     file.seekg(static_cast<std::streamoff>(offset), std::ios::beg);
 }
 
-}  // namespace
-
 Image BmpReader::Read(const std::string& path) const {
     std::ifstream file(path, std::ios::binary);
     if (!file.is_open()) {
@@ -127,7 +123,7 @@ Image BmpReader::Read(const std::string& path) const {
     ValidateImageSize(width, height);
 
     const size_t row_bytes = width * 3;
-    const size_t padding = CalculatePadding(width);
+    const size_t padding = CalculatePaddingReader(width);
     const size_t stride = row_bytes + padding;
     const size_t data_size = stride * height;
 

@@ -6,8 +6,6 @@
 
 #include "../exceptions.h"
 
-namespace {
-
 std::vector<double> BuildKernel(const double sigma) {
     const int radius = std::max(1, static_cast<int>(std::ceil(3.0 * sigma)));
     const int size = radius * 2 + 1;
@@ -86,8 +84,6 @@ Image BlurVertical(const Image& image, const std::vector<double>& kernel) {
 
     return result;
 }
-
-}  // namespace
 
 GaussianBlurFilter::GaussianBlurFilter(const double sigma) : sigma_(sigma) {
     if (sigma_ <= 0.0) {

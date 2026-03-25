@@ -17,8 +17,6 @@
 #include "../filters/sharpening.h"
 #include "../filters/vignette.h"
 
-namespace {
-
 using FilterCreator = std::function<std::unique_ptr<Filter>(const std::vector<std::string>&)>;
 
 void RequireParameterCount(const std::vector<std::string>& parameters, const std::size_t expected_count,
@@ -31,7 +29,7 @@ void RequireParameterCount(const std::vector<std::string>& parameters, const std
 
 std::size_t ParsePositiveSize(const std::string& value, const std::string& parameter_name) {
     std::size_t parsed_length = 0;
-    unsigned long long parsed_value = 0;
+    uint64_t parsed_value = 0;
 
     try {
         parsed_value = std::stoull(value, &parsed_length);
@@ -137,8 +135,6 @@ const std::unordered_map<std::string, FilterCreator>& GetCreators() {
 
     return CREATORS;
 }
-
-}  // namespace
 
 std::vector<std::unique_ptr<Filter>> FilterFactory::Create(const std::vector<FilterRequest>& filter_requests) const {
     std::vector<std::unique_ptr<Filter>> filters;
